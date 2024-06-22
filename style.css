@@ -1,0 +1,132 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  /* Centraliza horizontalmente */
+  align-items: flex-start;
+  /* Alinha no topo verticalmente para permitir rolagem */
+  min-height: 100vh;
+  /* Garante que a altura mínima seja 100% da viewport */
+  background-color: #DAD0C8;
+  box-sizing: border-box;
+  /* Garante que padding e borda sejam incluídos na largura e altura totais */
+}
+
+.informacoes_pessoais {
+  background-color: #FFC;
+  /* Cor de fundo do formulário */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  /* Aumenta a largura para 90% da largura da página */
+  max-width: 2500px;
+  /* Limita a largura máxima */
+  text-align: center;
+  margin: 10px auto;
+  /* Adiciona margem para espaçamento vertical */
+}
+
+h1,
+h2 {
+  text-align: center;
+}
+
+label {
+  display: block;
+  margin: 0 40px;
+  /* Ajusta margem vertical dos labels */
+  text-align: center;
+}
+
+input[type="text"],
+input[type="date"] {
+  width: 100%;
+  /* Ajusta a largura dos inputs para 100% do contêiner */
+  padding: 8px;
+  margin: 10px auto;
+  /* Ajusta a margem vertical e centraliza */
+  border: 2px solid #FF69B4;
+  border-radius: 4px;
+  display: block;
+  /* Garante que os inputs sejam blocos */
+}
+
+input[type="button"],
+button {
+  width: 84%;
+  /* Ajusta a largura dos botões para 84% do contêiner */
+  padding: 10px;
+  background-color: #FF1482;
+  /* Cor do botão */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: block;
+  /* Garante que os botões sejam blocos */
+  margin: 10px auto;
+  /* Ajusta a margem vertical e centraliza */
+}
+
+input[type="button"]:hover,
+button:hover {
+  background-color: #FF69B4;
+  /* Cor ao passar o mouse */
+}
+
+.formacao,
+.experiencias {
+  margin-top: 30px;
+}
+
+.formacao-box,
+.experiencia-box {
+  background-color: #FFCCCC;
+  padding: 10px;
+  border: 1px solid #FF69B4;
+  border-radius: 4px;
+  margin: 10px 0;
+  /* Margem vertical entre as boxes */
+}
+
+@media print {
+  body {
+    padding: 20px;
+    /* Adiciona margem interna para afastar do bordo da página */
+    font-family: Arial, sans-serif;
+    /* Define a fonte para impressão */
+  }
+
+  .informacoes_pessoais {
+    width: 100%;
+    /* Garante que o formulário ocupe a largura total da página de impressão */
+    max-width: none;
+    /* Remove a limitação de largura máxima */
+    margin: 0 auto;
+    /* Centraliza horizontalmente */
+    box-shadow: none;
+    /* Remove a sombra */
+    border-radius: 0;
+    /* Remove o arredondamento da borda */
+    padding: 0;
+    /* Remove o padding */
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="button"],
+  button {
+    display: none;
+    /* Esconde os inputs e botões */
+  }
+
+  .formacao-box,
+  .experiencia-box {
+    margin: 10px 0;
+    /* Ajusta a margem vertical entre as boxes */
+    page-break-inside: avoid;
+    /* Evita que as boxes sejam divididas entre páginas */
+  }
+}
