@@ -1,0 +1,30 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    # O CodeQL também pode ser executado em pull requests para garantir que novas alterações não introduzam novos problemas
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0' # Executa semanalmente
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
