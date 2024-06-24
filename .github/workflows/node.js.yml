@@ -1,0 +1,173 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const { body, validationResult } = require('express-validator');
+const helmet = require('helmet');
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+
+const app = express();
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(helmet());
+app.use(csrf({ cookie: true }));
+
+// Rota para salvar dados
+app.post('/save', [
+  body('nome').notEmpty().withMessage('Nome é obrigatório'),
+  body('data_nascimento').isDate().withMessage('Data de nascimento inválida'),
+  body('endereco').notEmpty().withMessage('Endereço é obrigatório'),
+  body('telefone').notEmpty().withMessage('Telefone é obrigatório'),
+  body('email').isEmail().withMessage('E-mail inválido')
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  // Processamento e salvamento dos dados no banco de dados
+  res.send('Informações salvas com sucesso');
+});
+
+// Servir a página com o formulário
+app.get('/', (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>Currículo</title>
+        <style>body { font-family: Arial, sans-serif; }</style>
+      </head>
+      <body>
+        <div id="app"></div>
+        <script>
+          // Adicione seu JavaScript aqui (com ajustes para enviar dados para o servidor)
+          document.addEventListener("DOMContentLoaded", function() {
+            const app = document.getElementById('app');
+            const container = document.createElement('div');
+            container.className = 'informacoes_pessoais';
+            const h1 = document.createElement('h1');
+            h1.textContent = 'Currículo';
+            const h2 = document.createElement('h2');
+            h2.textContent = 'Informações Pessoais:';
+            const labelsAndInputs = [
+              { label: 'Nome completo:', type: 'text', id: 'nome', name: 'nome' },
+              { label: 'Data de Nascimento:', type: 'date', id: 'data_nascimento', name: 'data_nascimento' },
+              { label: 'Endereço completo:', type: 'text', id: 'endereco', name: 'endereco' },
+              { label: 'Telefone:', type: 'text', id: 'telefone', name: 'telefone' },
+              { label: 'E-mail:', type: 'text', id: 'email', name: 'email' }
+            ];
+            container.appendChild(h1);
+            container.appendChild(h2);
+            labelsAndInputs.forEach(item => {
+              const label = document.createElement('label');
+              label.setAttribute('for', item.id);
+              label.textContent = item.label;
+              const input = document.createElement('input');
+              input.setAttribute('type', item.type);
+              input.setAttribute('id', item.id);
+              input.setAttribute('name', item.name);
+              container.appendChild(label);
+              container.appendChild(input);
+            });
+            const formacaoContainer = document.createElement('div');
+            formacaoContainer.className = 'formacao';
+            formacaoContainer.innerHTML = `
+              <h2>Formação:</h2>
+              <div class="formacao-boxes"></div>
+              <button type="button" class="add-formacao">Adicionar Formação</button>
+            `;
+            container.appendChild(formacaoContainer);
+            const experienciasContainer = document.createElement('div');
+            experienciasContainer.className = 'experiencias';
+            experienciasContainer.innerHTML = `
+              <h2>Experiências Profissionais:</h2>
+              <div class="experiencias-boxes"></div>
+              <button type="button" class="add-experiencia">Adicionar Experiência</button>
+            `;
+            container.appendChild(experienciasContainer);
+            const saveButton = document.createElement('input');
+            saveButton.setAttribute('type', 'button');
+            saveButton.setAttribute('value', 'Salvar');
+            saveButton.addEventListener('click', function() {
+              const nome = document.getElementById('nome').value;
+              const dataNascimento = document.getElementById('data_nascimento').value;
+              const endereco = document.getElementById('endereco').value;
+              const telefone = document.getElementById('telefone').value;
+              const email = document.getElementById('email').value;
+              const formacoes = document.querySelectorAll('.formacao-box');
+              const experiencias = document.querySelectorAll('.experiencia-box');
+              const formacaoData = Array.from(formacoes).map(formacao => ({
+                curso: formacao.querySelector('.curso').value,
+                instituicao: formacao.querySelector('.instituicao').value,
+                anoConclusao: formacao.querySelector('.ano_conclusao').value
+              }));
+              const experienciaData = Array.from(experiencias).map(experiencia => ({
+                empresa: experiencia.querySelector('.empresa').value,
+                cargo: experiencia.querySelector('.cargo').value,
+                periodo: experiencia.querySelector('.periodo').value
+              }));
+              fetch('/save', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'CSRF-Token': '${req.csrfToken()}'
+                },
+                body: JSON.stringify({
+                  nome,
+                  data_nascimento: dataNascimento,
+                  endereco,
+                  telefone,
+                  email,
+                  formacoes: formacaoData,
+                  experiencias: experienciaData
+                })
+              })
+              .then(response => response.json())
+              .then(data => alert(data.message))
+              .catch(error => console.error('Erro:', error));
+            });
+            container.appendChild(saveButton);
+            app.appendChild(container);
+            document.querySelector('.add-formacao').addEventListener('click', () => {
+              const box = document.createElement('div');
+              box.className = 'formacao-box';
+              box.innerHTML = `
+                <label for="curso">Curso:</label>
+                <input type="text" name="curso" class="curso">
+                <label for="instituicao">Instituição:</label>
+                <input type="text" name="instituicao" class="instituicao">
+                <label for="ano_conclusao">Ano de Conclusão:</label>
+                <input type="text" name="ano_conclusao" class="ano_conclusao">
+                <button type="button" class="remove-box">Remover</button>
+              `;
+              document.querySelector('.formacao-boxes').appendChild(box);
+              box.querySelector('.remove-box').addEventListener('click', () => {
+                box.remove();
+              });
+            });
+            document.querySelector('.add-experiencia').addEventListener('click', () => {
+              const box = document.createElement('div');
+              box.className = 'experiencia-box';
+              box.innerHTML = `
+                <label for="empresa">Empresa:</label>
+                <input type="text" name="empresa" class="empresa">
+                <label for="cargo">Cargo:</label>
+                <input type="text" name="cargo" class="cargo">
+                <label for="periodo">Período:</label>
+                <input type="text" name="periodo" class="periodo">
+                <button type="button" class="remove-box">Remover</button>
+              `;
+              document.querySelector('.experiencias-boxes').appendChild(box);
+              box.querySelector('.remove-box').addEventListener('click', () => {
+                box.remove();
+              });
+            });
+          });
+        </script>
+      </body>
+    </html>
+  `);
+});
+
+app.listen(3000, () => {
+  console.log('Servidor rodando na porta 3000');
+});
